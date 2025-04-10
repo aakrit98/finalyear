@@ -2,6 +2,7 @@
 const { getUser } = require('../service/auth');
 
 function restrictToLoggedinUserOnly(req, res, next) {
+
   // Get token from Authorization header
   const authHeader = req.headers.authorization;
   if (!authHeader || !authHeader.startsWith('Bearer ')) {
@@ -26,10 +27,22 @@ function checkAuth(req, res, next) {
     const user = getUser(token);
     req.user = user;
   }
+  next(); 
+} 
+
+
+function restrictToAdminOnly(req, res, next) {
+  // Check if the user is an admin
+  if (req.user && req.user.role !== "admin") {
+    return res.status(403).json({ msg: "Access forbidden: Admins only" });
+  }
   next();
 }
 
+
+
 module.exports = {
   restrictToLoggedinUserOnly,
-  checkAuth,
+  checkAuth, 
+  restrictToAdminOnly,
 };

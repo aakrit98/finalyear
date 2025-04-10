@@ -14,7 +14,7 @@ const cartRouter = require("./routes/cart")
 const addressRouter = require("./routes/address") 
 const orderRouter = require("./routes/order") 
 const wishlistRouter  = require("./routes/wishList")
-
+const clientProductRouter = require("./routes/clientProduct")
 const app = express();
 const PORT = 8001;
 
@@ -46,7 +46,8 @@ app.use("/products", productRouter);
 app.use("/postproduct" , postProductRouter); 
 app.use("/address" , addressRouter); 
 app.use("/order", orderRouter ); 
-app.use("/wishlist" , wishlistRouter);
+app.use("/wishlist" , wishlistRouter); 
+app.use("/client" ,clientProductRouter );
 
 //serve uploaded images 
 app.use("/uploads" , express.static("uploads"));

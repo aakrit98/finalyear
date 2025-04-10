@@ -2,44 +2,55 @@ const { db } = require("../connect");
 const path = require("path");
 const fs = require("fs");
 
+// controllers/postProduct.js
+
+// User posts a product for approval
 async function handlePostProduct(req, res) {
-    const { name, description, price, size, phoneNumber } = req.body;
-    const productImage = req.file ? req.file.filename : null;
-  
-    // Validate required fields
-    if (!name || !description || !price || !size || !phoneNumber) {
-      return res.status(400).json({ msg: "All fields are required" });
-    }
-  
-    // Validate phone number length (exactly 10 digits)
-    if (phoneNumber.toString().length !== 10) {
-      return res.status(400).json({ msg: "Phone number must be 10 digits" });
-    }
-  
-    try {
-      const [result] = await db.query(
-        `INSERT INTO PostProduct (Name, Description, Price, Image, Size, PhoneNumber) 
-         VALUES (?, ?, ?, ?, ?, ?)`,
-        [name, description, price, productImage, size, phoneNumber]
-      );
-  
-      const imageUrl = productImage ? `${req.protocol}://${req.get("host")}/uploads/${productImage}` : null;
-  
-      return res.status(201).json({
-        status: "success",
-        id: result.insertId,
-        msg: "Product added successfully",
-        image: imageUrl,
-      });
-    } catch (error) {
-      console.error("Error inserting into database:", error);
-      return res.status(500).json({
-        status: "error",
-        msg: "Internal server error",
-        error: error.message,
-      });
-    }
+  const { name, description, price, size, phoneNumber } = req.body;
+  console.log("User", req.user);
+  console.log("Post: ",req.body);
+  // Getting userId from req.user (extracted by the middleware)
+  const userId = req.user._id;
+  console.log("UserID", userId);
+
+  // Image handling
+  const productImage = req.file ? req.file.filename : null;
+
+  // Validate required fields
+  if (!name || !description || !price || !size || !phoneNumber) {
+    return res.status(400).json({ msg: "All fields are required" });
   }
+
+  // Validate phone number length (exactly 10 digits)
+  if (phoneNumber.toString().length !== 10) {
+    return res.status(400).json({ msg: "Phone number must be 10 digits" });
+  }
+
+  try {
+    const [result] = await db.query(
+      `INSERT INTO ClientProduct (UserID, Name, Description, Price, Image, Size, PhoneNumber, Status) 
+       VALUES (?, ?, ?, ?, ?, ?, ?, 'pending')`,
+      [userId, name, description, price, productImage, size, phoneNumber]
+    );
+
+    const imageUrl = productImage ? `${req.protocol}://${req.get("host")}/uploads/${productImage}` : null;
+
+    return res.status(201).json({
+      status: "success",
+      id: result.insertId,
+      msg: "Product submitted for approval",
+      image: imageUrl,
+    });
+  } catch (error) {
+    console.error("Error inserting into database:", error);
+    return res.status(500).json({
+      status: "error",
+      msg: "Internal server error",
+      error: error.message,
+    });
+  }
+}
+
   
   async function handleGetAllProduct(req, res) {
     try {

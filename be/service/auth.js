@@ -5,10 +5,12 @@ function setUser(user) {
     {
       _id: user.id,
       email: user.email,
+      role: user.role // Add the role to the JWT payload
     },
     secret
   );
 }
+
 
 function getUser(token) {
   if (!token) return null;
